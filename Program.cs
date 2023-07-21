@@ -2,9 +2,15 @@ using System;
 using System.Drawing;
 using System.Numerics;
 using System.Windows.Forms;
+
 using Engine;
+using Engine.Core;
+using Engine.Meshs;
+
+var cube = new Cube(new Point3D(2.5f, 2.5f, 2.5f), 5, 1);
 
 Scene.Create(
+    // cube
     new Mesh(
         new Face(
             (10, 0, 0),
@@ -70,7 +76,7 @@ form.Controls.Add(pb);
 
 form.Load += delegate
 {
-    cam = new Camera(Point3D.Empty, new Vector3(1, 0, 0), new Vector3(0, 1, 0), pb.Width, pb.Height, 20f, 1000);
+    cam = new Camera(Point3D.Empty, new Vector3(1, 0, 0), new Vector3(0, 1, 0), pb.Width, pb.Height, 400f, 1000);
     bmp = new Bitmap(pb.Width, pb.Height);
     g = Graphics.FromImage(bmp);
     pb.Image = bmp;
