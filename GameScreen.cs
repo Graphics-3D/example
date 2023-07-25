@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Engine;
-using Engine.Meshes;
 
 public class Screen : Form
 {
@@ -19,11 +19,9 @@ public class Screen : Form
     public Screen()
     {
         renderTimes.Enqueue(DateTime.Now);
-        Scene.Create(
-            new Cube(new Point3D(2.5f, 2.5f, 2.5f), 5),
-            new Cube(new Point3D(10.5f, 10.5f, 10.5f), 5)
-        );
         
+        Cursor.Hide();
+
         this.WindowState = FormWindowState.Maximized;
         this.FormBorderStyle = FormBorderStyle.None;
         this.Controls.Add(pb);
@@ -34,43 +32,77 @@ public class Screen : Form
             var bmp = new Bitmap(pb.Width, pb.Height);
             g = Graphics.FromImage(bmp);
             pb.Image = bmp;
+
+            CenterScreen = new Point(pb.Width / 2, pb.Height / 2);
         };
 
-        this.KeyDown += (o, e) =>
-        {
-            var key = e.KeyCode;
+        this.KeyDown += KeyBind;
 
-            if (key == Keys.Escape)
-            {
-                isRunning = false;
-                Application.Exit();
-            }
-
-            if (key == Keys.M)
-            {
-                var rad = 0.1f;
-                var sin = MathF.Sin(rad);
-                var cos = MathF.Cos(rad);
-                cam.RotateZ(cos, sin);
-            }
-
-            if (key == Keys.W)
-                cam.Translate(1, 0, 0);
-
-            else if (key == Keys.S)
-                cam.Translate(-1, 0, 0);
-
-            if (key == Keys.A)
-                cam.Translate(0, -1, 0);
-
-            else if (key == Keys.D)
-                cam.Translate(0, 1, 0);
-
-            if (key == Keys.Space)
-                Jump();
-        };
+        this.pb.MouseMove += MouseControl;
     }
-    
+
+    [DllImport("user32.dll", EntryPoint = "SetCursorPos")]
+    private static extern bool SetCursorPos(int X, int Y);
+
+    private Point CenterScreen;
+    private void MouseControl(object? o, MouseEventArgs e)
+    {
+        var sensibility = 1000f;
+        var x = -(CenterScreen.X - e.X) / sensibility;
+        var y = -(CenterScreen.Y - e.Y) / sensibility;
+        
+        var sinX = MathF.Sin(x);
+        var cosX = MathF.Cos(x);
+
+        var sinY = MathF.Sin(y);
+        var cosY = MathF.Cos(y);
+        
+        cam?.RotateZ(cosX, sinX);
+        cam?.RotateY(cosY, sinY);
+        
+        SetCursorPos(CenterScreen.X, CenterScreen.Y);
+    }
+
+    private void KeyBind(object? o, KeyEventArgs e)
+    {
+        var key = e.KeyCode;
+
+        if (key == Keys.Escape)
+        {
+            isRunning = false;
+            Application.Exit();
+        }
+
+        if (key == Keys.R)
+        {
+            var rad = 0.1f;
+            var sin = MathF.Sin(rad);
+            var cos = MathF.Cos(rad);
+            cam.RotateZ(cos, sin);
+        }
+
+        if (key == Keys.W)
+            cam.Translate(1, 0, 0);
+
+        else if (key == Keys.S)
+            cam.Translate(-1, 0, 0);
+
+        if (key == Keys.A)
+            cam.Translate(0, -1, 0);
+
+        else if (key == Keys.D)
+            cam.Translate(0, 1, 0);
+
+        if (key == Keys.M)
+            cam.Translate(0, 0, 1);
+
+        if (key == Keys.N)
+            cam.Translate(0, 0, 1);
+
+        if (key == Keys.Space)
+            Jump();
+    }
+
     public void Run()
     {
         while (isRunning)
@@ -81,9 +113,7 @@ public class Screen : Form
             cam?.Render();
             cam?.Draw(g);
 
-            var drawFont = new Font("Arial", 16);
-            PointF drawPoint = new PointF(50.0F, 50.0F);
-            g.DrawString($"{fps} fps", drawFont, Brushes.Black, drawPoint);
+            g.DrawString($"{fps} fps", DefaultFont, Brushes.Red, new PointF(50.0F, 50.0F));
             
             pb?.Refresh();
             Application.DoEvents();
