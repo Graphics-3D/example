@@ -8,20 +8,13 @@ using Engine.Meshes;
 
 public class Screen : Form
 {
-    int fps = 0;
-    bool isRunning = true;
-    Camera cam = null!;
-    Graphics g = null!;
-    Timer tm = new()
-    {
-        Interval = 16
-    };
-    PictureBox pb = new()
+    private bool isRunning = true;
+    private Camera cam = null!;
+    private Graphics g = null!;
+    private PictureBox pb = new()
     {
         Dock = DockStyle.Fill
     };
-
-    Queue<DateTime> renderTimes = new();
 
     public Screen()
     {
@@ -37,11 +30,10 @@ public class Screen : Form
 
         this.Load += delegate
         {
-            cam = new Camera(new Point3D(-100, 0, 0), new Vector3(1, 1, 0), new Vector3(0, 1, 0), pb.Width, pb.Height, 1000f, 1000);
+            cam = new Camera(new Point3D(-100, 0, 0), new Vector3(1, 0, 0), new Vector3(0, 1, 0), pb.Width, pb.Height, 1000f, 1000);
             var bmp = new Bitmap(pb.Width, pb.Height);
             g = Graphics.FromImage(bmp);
             pb.Image = bmp;
-            tm.Start();
         };
 
         this.KeyDown += (o, e) =>
@@ -52,6 +44,14 @@ public class Screen : Form
             {
                 isRunning = false;
                 Application.Exit();
+            }
+
+            if (key == Keys.M)
+            {
+                var rad = 0.1f;
+                var sin = MathF.Sin(rad);
+                var cos = MathF.Cos(rad);
+                cam.RotateZ(cos, sin);
             }
 
             if (key == Keys.W)
@@ -69,27 +69,32 @@ public class Screen : Form
             if (key == Keys.Space)
                 Jump();
         };
-
-        tm.Tick += (o, e) =>
-        {
-            while (isRunning)
-            {
-                getFPS();
-                checkJump();
-
-                cam?.Render();
-                cam?.Draw(g);
-
-                var drawFont = new Font("Arial", 16);
-                PointF drawPoint = new PointF(50.0F, 50.0F);
-                g.DrawString($"{fps} fps", drawFont, Brushes.Black, drawPoint);
-                
-                pb?.Refresh();
-            }
-        };
     }
     
-    int precisionFPS = 19;
+    public void Run()
+    {
+        while (isRunning)
+        {
+            getFPS();
+            checkJump();
+
+            cam?.Render();
+            cam?.Draw(g);
+
+            var drawFont = new Font("Arial", 16);
+            PointF drawPoint = new PointF(50.0F, 50.0F);
+            g.DrawString($"{fps} fps", drawFont, Brushes.Black, drawPoint);
+            
+            pb?.Refresh();
+            Application.DoEvents();
+        }
+    }
+
+    #region FPS
+
+    private int fps = 0;
+    private int precisionFPS = 19;
+    private Queue<DateTime> renderTimes = new();
     void getFPS()
     {
         var now = DateTime.Now;
@@ -103,8 +108,12 @@ public class Screen : Form
         }
     }
 
-    bool isJumping = false;
-    float zVel = 0;
+    #endregion
+
+    #region Jump
+
+    private bool isJumping = false;
+    private float zVel = 0;
     void Jump()
     {
         if (isJumping)
@@ -133,4 +142,6 @@ public class Screen : Form
 
         zVel -= 1;
     }
+
+    #endregion
 }
