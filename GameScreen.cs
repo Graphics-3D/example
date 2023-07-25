@@ -36,7 +36,8 @@ public class Screen : Form
             CenterScreen = new Point(pb.Width / 2, pb.Height / 2);
         };
 
-        this.KeyDown += KeyBind;
+        this.KeyDown += KeyBindDown;
+        this.KeyUp += KeyBindUp;
 
         this.pb.MouseMove += MouseControl;
     }
@@ -63,7 +64,11 @@ public class Screen : Form
         SetCursorPos(CenterScreen.X, CenterScreen.Y);
     }
 
-    private void KeyBind(object? o, KeyEventArgs e)
+    private float xVel = 0;
+    private float yVel = 0;
+    private float zVel = 0;
+    
+    private void KeyBindDown(object? o, KeyEventArgs e)
     {
         var key = e.KeyCode;
 
@@ -73,42 +78,43 @@ public class Screen : Form
             Application.Exit();
         }
 
-        if (key == Keys.R)
-        {
-            var rad = 0.1f;
-            var sin = MathF.Sin(rad);
-            var cos = MathF.Cos(rad);
-            cam.RotateZ(cos, sin);
-        }
-
         if (key == Keys.W)
-            cam.Translate(1, 0, 0);
+            xVel = 1;
 
         else if (key == Keys.S)
-            cam.Translate(-1, 0, 0);
+            xVel = -1;
 
         if (key == Keys.A)
-            cam.Translate(0, -1, 0);
+            yVel = -1;
 
         else if (key == Keys.D)
-            cam.Translate(0, 1, 0);
-
-        if (key == Keys.M)
-            cam.Translate(0, 0, 1);
-
-        if (key == Keys.N)
-            cam.Translate(0, 0, 1);
-
+            yVel = 1;
+        
         if (key == Keys.Space)
             Jump();
     }
+
+    private void KeyBindUp(object? o, KeyEventArgs e)
+    {
+        var key = e.KeyCode;
+
+        if (key == Keys.W || key == Keys.S)
+            xVel = 0;
+
+        if (key == Keys.A || key == Keys.D)
+            yVel = 0;
+    }
+
+    private void checkMovement()
+        => cam.Translate(xVel, yVel, zVel);
 
     public void Run()
     {
         while (isRunning)
         {
             getFPS();
-            checkJump();
+            updateJump();
+            checkMovement();
 
             cam?.Render();
             cam?.Draw(g);
@@ -143,7 +149,6 @@ public class Screen : Form
     #region Jump
 
     private bool isJumping = false;
-    private float zVel = 0;
     void Jump()
     {
         if (isJumping)
@@ -153,24 +158,23 @@ public class Screen : Form
         isJumping = true;
     }
 
-    void checkJump()
+    void updateJump()
     {
         if (!isJumping)
             return;
-
-        cam?.Translate(0, 0, zVel);
         
+        zVel -= 1f;
+
         if (cam?.Location.Z < 0)
         {
             cam.Location = cam.Location with
             {
                 Z = 0
             };
-
+            
+            zVel = 0;
             isJumping = false;
         }
-
-        zVel -= 1;
     }
 
     #endregion
