@@ -8,6 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Engine/Engine.csproj" />
+    <ProjectReference Include="../Engine/src/Engine.csproj" />
   </ItemGroup>
 </Project>

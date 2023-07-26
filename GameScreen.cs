@@ -5,6 +5,8 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Engine;
+using Engine.Core;
+using Engine.Meshes;
 
 public class Screen : Form
 {
@@ -36,9 +38,8 @@ public class Screen : Form
             CenterScreen = new Point(pb.Width / 2, pb.Height / 2);
         };
 
-        this.KeyDown += KeyBindDown;
         this.KeyUp += KeyBindUp;
-
+        this.KeyDown += KeyBindDown;
         this.pb.MouseMove += MouseControl;
     }
 
@@ -58,6 +59,8 @@ public class Screen : Form
         var sinY = MathF.Sin(y);
         var cosY = MathF.Cos(y);
         
+        // cam?.Rotate(cosX, sinX, cosY, sinY);
+
         cam?.RotateZ(cosX, sinX);
         cam?.RotateY(cosY, sinY);
         
@@ -106,7 +109,21 @@ public class Screen : Form
     }
 
     private void checkMovement()
-        => cam.Translate(xVel, yVel, zVel);
+    {
+        cam.Translate(xVel, yVel, zVel);
+
+        foreach (var mesh in Scene.Current.Meshes)
+        {
+            if (mesh is Cube cube)
+            {
+                if (cube.Collided(cam.Location) != "false")
+                {
+                    // cam.Translate(-xVel, -yVel, -zVel);
+                    break;
+                }
+            }
+        }
+    }
 
     public void Run()
     {
@@ -120,7 +137,13 @@ public class Screen : Form
             cam?.Draw(g);
 
             g.DrawString($"{fps} fps", DefaultFont, Brushes.Red, new PointF(50.0F, 50.0F));
-            
+
+            var cube = Scene.Current.Meshes[0] as Cube;
+            if (cam?.Location is not null)
+                g.DrawString($"Collided: {cube?.Collided(cam.Location)}", DefaultFont, Brushes.Red, new PointF(50.0F, 150.0F));
+
+
+
             pb?.Refresh();
             Application.DoEvents();
         }
