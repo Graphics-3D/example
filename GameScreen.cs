@@ -80,9 +80,16 @@ public class Screen : Form
     private float aVelY = 0;
     private float dVelY = 0;
     
+    public bool isW = false;
+    public bool isS = false;
+    public bool isA = false;
+    public bool isD = false;
+
     private void KeyBindDown(object? o, KeyEventArgs e)
     {
         var key = e.KeyCode;
+        var unitNormal = Vector3.Normalize(cam.Normal);
+        var unitHorizontal = Vector3.Normalize(cam.Horizontal);
 
         if (key == Keys.Escape)
         {
@@ -92,32 +99,66 @@ public class Screen : Form
 
         if (key == Keys.W)
         {
-            wVelX = cam.Normal.X * velocity; 
+            if(isW)
+            {
+                xVel -= wVelX;
+                yVel -= wVelY;
+            }
+            isW = true;
+
+            wVelX = unitNormal.X * velocity; 
             xVel += wVelX;
 
-            wVelY = cam.Normal.Y * velocity; 
+            wVelY = unitNormal.Y * velocity; 
             yVel += wVelY;
         }
 
         else if (key == Keys.S)
         {
-            sVelX = cam.Normal.X * velocity; 
+            if(isS)
+            {
+                xVel += sVelX;
+                yVel += sVelY;
+            }
+            isS = true;
+
+            sVelX = unitNormal.X * velocity; 
             xVel -= sVelX;
 
-            sVelY = cam.Normal.Y * velocity; 
+            sVelY = unitNormal.Y * velocity; 
             yVel -= sVelY;
         }
 
         if (key == Keys.A)
         {
-            xVel -= cam.Horizontal.X * velocity;
-            yVel -= cam.Horizontal.Y * velocity;
+            if(isA)
+            {
+                xVel += aVelX;
+                yVel += aVelY;
+            }
+            isA = true;
+
+            aVelX = unitHorizontal.X * velocity;
+            xVel -= aVelX;
+
+            aVelY = unitHorizontal.Y * velocity;
+            yVel -= aVelY;
         }
 
         else if (key == Keys.D)
         {
-            xVel += cam.Horizontal.X * velocity;
-            yVel += cam.Horizontal.Y * velocity;
+            if(isD)
+            {
+                xVel -= dVelX;
+                yVel -= dVelY;
+            }
+            isD = true;
+
+            dVelX = unitHorizontal.X * velocity;
+            xVel += dVelX;
+
+            dVelY = unitHorizontal.Y * velocity;
+            yVel += dVelY;
         }
         
         if (key == Keys.Space)
@@ -130,26 +171,34 @@ public class Screen : Form
 
         if (key == Keys.W)
         {
+            isW = false;
+
             xVel -= wVelX;
             yVel -= wVelY;
         }
 
         if (key == Keys.S)
         {
+            isS = false;
+            
             xVel += sVelX;
             yVel += sVelY;
         }
 
         if (key == Keys.A)
         {
-            xVel += cam.Horizontal.X * velocity;
-            yVel += cam.Horizontal.Y * velocity;
+            isA = false;
+            
+            xVel += aVelX;
+            yVel += aVelY;
         }
         
         if (key == Keys.D)
         {
-            xVel -= cam.Horizontal.X * velocity;
-            yVel -= cam.Horizontal.Y * velocity;
+            isD = false;
+            
+            xVel -= dVelX;
+            yVel -= dVelY;
         }
     }
 
