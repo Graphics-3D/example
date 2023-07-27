@@ -30,7 +30,7 @@ public class Screen : Form
 
         this.Load += delegate
         {
-            cam = new Camera(new Point3D(-200, 0, 0), new Vector3(1, 0, 0), new Vector3(0, 1, 0), pb.Width, pb.Height, 1000f, 1000);
+            cam = new Camera(new Point3D(-200, 0, 0), new Vector3(1, 1E-10f, 0), new Vector3(0, 1, 0), pb.Width, pb.Height, 1000f, 1000);
             var bmp = new Bitmap(pb.Width, pb.Height);
             g = Graphics.FromImage(bmp);
             pb.Image = bmp;
@@ -204,6 +204,14 @@ public class Screen : Form
 
     private void checkMovement()
     {
+        // Vector2 movementVector = new(xVel, yVel);
+        // Vector2 movementVectorNormalized = new(0, 0);
+
+        // if (movementVector != Vector2.Zero)
+        //     movementVectorNormalized = Vector2.Normalize(movementVector);
+
+        // cam.Translate(movementVectorNormalized.X, movementVectorNormalized.Y, zVel);
+        
         cam.Translate(xVel, yVel, zVel);
 
         foreach (var mesh in Scene.Current.Meshes)
