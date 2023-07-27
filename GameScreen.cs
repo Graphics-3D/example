@@ -30,7 +30,7 @@ public class Screen : Form
 
         this.Load += delegate
         {
-            cam = new Camera(new Point3D(-100, 0, 0), new Vector3(1, 0, 0), new Vector3(0, 1, 0), pb.Width, pb.Height, 1000f, 1000);
+            cam = new Camera(new Point3D(-200, 0, 0), new Vector3(1, 0, 0), new Vector3(0, 1, 0), pb.Width, pb.Height, 1000f, 1000);
             var bmp = new Bitmap(pb.Width, pb.Height);
             g = Graphics.FromImage(bmp);
             pb.Image = bmp;
@@ -70,6 +70,15 @@ public class Screen : Form
     private float xVel = 0;
     private float yVel = 0;
     private float zVel = 0;
+    private float velocity = 2f;
+    private float wVelX = 0;
+    private float sVelX = 0;
+    private float aVelX = 0;
+    private float dVelX = 0;
+    private float wVelY = 0;
+    private float sVelY = 0;
+    private float aVelY = 0;
+    private float dVelY = 0;
     
     private void KeyBindDown(object? o, KeyEventArgs e)
     {
@@ -82,16 +91,34 @@ public class Screen : Form
         }
 
         if (key == Keys.W)
-            xVel = 1;
+        {
+            wVelX = cam.Normal.X * velocity; 
+            xVel += wVelX;
+
+            wVelY = cam.Normal.Y * velocity; 
+            yVel += wVelY;
+        }
 
         else if (key == Keys.S)
-            xVel = -1;
+        {
+            sVelX = cam.Normal.X * velocity; 
+            xVel -= sVelX;
+
+            sVelY = cam.Normal.Y * velocity; 
+            yVel -= sVelY;
+        }
 
         if (key == Keys.A)
-            yVel = -1;
+        {
+            xVel -= cam.Horizontal.X * velocity;
+            yVel -= cam.Horizontal.Y * velocity;
+        }
 
         else if (key == Keys.D)
-            yVel = 1;
+        {
+            xVel += cam.Horizontal.X * velocity;
+            yVel += cam.Horizontal.Y * velocity;
+        }
         
         if (key == Keys.Space)
             Jump();
@@ -101,11 +128,29 @@ public class Screen : Form
     {
         var key = e.KeyCode;
 
-        if (key == Keys.W || key == Keys.S)
-            xVel = 0;
+        if (key == Keys.W)
+        {
+            xVel -= wVelX;
+            yVel -= wVelY;
+        }
 
-        if (key == Keys.A || key == Keys.D)
-            yVel = 0;
+        if (key == Keys.S)
+        {
+            xVel += sVelX;
+            yVel += sVelY;
+        }
+
+        if (key == Keys.A)
+        {
+            xVel += cam.Horizontal.X * velocity;
+            yVel += cam.Horizontal.Y * velocity;
+        }
+        
+        if (key == Keys.D)
+        {
+            xVel -= cam.Horizontal.X * velocity;
+            yVel -= cam.Horizontal.Y * velocity;
+        }
     }
 
     private void checkMovement()
@@ -116,7 +161,7 @@ public class Screen : Form
         {
             if (mesh is Cube cube)
             {
-                if (cube.Collided(cam.Location) == "true")
+                if (cube.Collided(cam.Location) == CollidedResult.True)
                 {
                     cam.Translate(-xVel, -yVel, -zVel);
                     break;
@@ -137,7 +182,7 @@ public class Screen : Form
             cam?.Draw(g);
 
             g.DrawString($"{fps} fps", DefaultFont, Brushes.Red, new PointF(50.0F, 50.0F));
-            g.DrawString($"{cam?.Location}", DefaultFont, Brushes.Black, new PointF(50.0F, 100.0F));
+            g.DrawString($"{cam?.Normal}", DefaultFont, Brushes.Black, new PointF(50.0F, 100.0F));
 
             var cube = Scene.Current.Meshes[0] as Cube;
             if (cam?.Location is not null)
