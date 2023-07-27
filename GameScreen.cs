@@ -53,15 +53,15 @@ public class Screen : Form
         var x = -(CenterScreen.X - e.X) / sensibility;
         var y = -(CenterScreen.Y - e.Y) / sensibility;
         
-        var sinX = MathF.Sin(x);
-        var cosX = MathF.Cos(x);
+        var sinZ = MathF.Sin(x);
+        var cosZ = MathF.Cos(x);
 
         var sinY = MathF.Sin(y);
         var cosY = MathF.Cos(y);
         
-        // cam?.Rotate(cosX, sinX, cosY, sinY);
+        // cam?.Rotate(cosY, sinY, cosZ, sinZ);
 
-        cam?.RotateZ(cosX, sinX);
+        cam?.RotateZ(cosZ, sinZ);
         cam?.RotateY(cosY, sinY);
         
         SetCursorPos(CenterScreen.X, CenterScreen.Y);
@@ -116,9 +116,9 @@ public class Screen : Form
         {
             if (mesh is Cube cube)
             {
-                if (cube.Collided(cam.Location) != "false")
+                if (cube.Collided(cam.Location) == "true")
                 {
-                    // cam.Translate(-xVel, -yVel, -zVel);
+                    cam.Translate(-xVel, -yVel, -zVel);
                     break;
                 }
             }
@@ -137,10 +137,11 @@ public class Screen : Form
             cam?.Draw(g);
 
             g.DrawString($"{fps} fps", DefaultFont, Brushes.Red, new PointF(50.0F, 50.0F));
+            g.DrawString($"{cam?.Location}", DefaultFont, Brushes.Black, new PointF(50.0F, 100.0F));
 
             var cube = Scene.Current.Meshes[0] as Cube;
             if (cam?.Location is not null)
-                g.DrawString($"Collided: {cube?.Collided(cam.Location)}", DefaultFont, Brushes.Red, new PointF(50.0F, 150.0F));
+                g.DrawString($"Collided: {cube?.Collided(cam.Location)}", DefaultFont, Brushes.Black, new PointF(50.0F, 150.0F));
 
 
 
