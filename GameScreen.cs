@@ -59,10 +59,10 @@ public class Screen : Form
         var sinY = MathF.Sin(y);
         var cosY = MathF.Cos(y);
         
-        // cam?.Rotate(cosY, sinY, cosZ, sinZ);
+        cam?.RotateGimbalLock(cosY, sinY, cosZ, sinZ);
 
-        cam?.RotateZ(cosZ, sinZ);
-        cam?.RotateY(cosY, sinY);
+        // cam?.RotateZ(cosZ, sinZ);
+        // cam?.RotateY(cosY, sinY);
         
         SetCursorPos(CenterScreen.X, CenterScreen.Y);
     }
@@ -80,10 +80,10 @@ public class Screen : Form
     private float aVelY = 0;
     private float dVelY = 0;
     
-    public bool isW = false;
-    public bool isS = false;
-    public bool isA = false;
-    public bool isD = false;
+    private bool isW = false;
+    private bool isS = false;
+    private bool isA = false;
+    private bool isD = false;
 
     private void KeyBindDown(object? o, KeyEventArgs e)
     {
@@ -202,6 +202,8 @@ public class Screen : Form
         }
     }
 
+    private float minJumpZ = 0;
+
     private void checkMovement()
     {
         // Vector2 movementVector = new(xVel, yVel);
@@ -218,11 +220,17 @@ public class Screen : Form
         {
             if (mesh is Cube cube)
             {
-                if (cube.Collided(cam.Location) == CollidedResult.True)
+                var collisionResult = cube.Collided(cam.Location);
+                if (collisionResult.result == CollidedResult.True)
                 {
                     cam.Translate(-xVel, -yVel, -zVel);
+
+                        minJumpZ = collisionResult.top;
+
                     break;
                 }
+                else
+                    minJumpZ = 0;
             }
         }
     }
@@ -239,7 +247,8 @@ public class Screen : Form
             cam?.Draw(g);
 
             g.DrawString($"{fps} fps", DefaultFont, Brushes.Red, new PointF(50.0F, 50.0F));
-            g.DrawString($"{cam?.Normal}", DefaultFont, Brushes.Black, new PointF(50.0F, 100.0F));
+            g.DrawString($"{cam?.Location}", DefaultFont, Brushes.Black, new PointF(50.0F, 100.0F));
+            g.DrawString($"{minJumpZ}", DefaultFont, Brushes.Black, new PointF(50.0F, 125.0F));
 
             var cube = Scene.Current.Meshes[0] as Cube;
             if (cam?.Location is not null)
@@ -291,11 +300,11 @@ public class Screen : Form
         
         zVel -= 1f;
 
-        if (cam?.Location.Z < 0)
+        if (cam?.Location.Z < minJumpZ)
         {
             cam.Location = cam.Location with
             {
-                Z = 0
+                Z = minJumpZ
             };
             
             zVel = 0;
