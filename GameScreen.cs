@@ -50,19 +50,13 @@ public class Screen : Form
     private void MouseControl(object? o, MouseEventArgs e)
     {
         var sensibility = 1000f;
-        var x = -(CenterScreen.X - e.X) / sensibility;
-        var y = -(CenterScreen.Y - e.Y) / sensibility;
+        var thetaZ = -(CenterScreen.X - e.X) / sensibility;
+        var thetaY = -(CenterScreen.Y - e.Y) / sensibility;
         
-        var sinZ = MathF.Sin(x);
-        var cosZ = MathF.Cos(x);
+        cam?.RotateQuaternionZ(thetaZ);
+        cam?.RotateQuaternionY(thetaY);
 
-        var sinY = MathF.Sin(y);
-        var cosY = MathF.Cos(y);
-        
-        cam?.RotateGimbalLock(cosY, sinY, cosZ, sinZ);
-
-        // cam?.RotateZ(cosZ, sinZ);
-        // cam?.RotateY(cosY, sinY);
+        // cam?.RotateGimbalLock(cosY, sinY, cosZ, sinZ);
         
         SetCursorPos(CenterScreen.X, CenterScreen.Y);
     }
